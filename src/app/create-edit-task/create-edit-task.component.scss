@@ -1,0 +1,16 @@
+.content {
+  margin-top: 10px;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.action {
+  margin: 0px 25px 20px;
+  button {
+    flex: 1;
+  }
+}

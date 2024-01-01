@@ -1,0 +1,26 @@
+<div mat-dialog-title>
+  <h1>Task Form</h1>
+</div>
+<form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
+  <div mat-dialog-content class="content">
+    <div class="row">
+      <mat-form-field appearance="outline">
+        <mat-label>User Name</mat-label>
+        <input matInput type="text" placeholder="Chris" formControlName="username"/>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" placeholder="test@test.com" formControlName="email"/>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Text Note</mat-label>
+        <textarea matInput formControlName="text"></textarea>
+      </mat-form-field>
+    </div>
+    <mat-checkbox formControlName="status">Status</mat-checkbox>
+  </div>
+  <div mat-dialog-actions class="action">
+    <button mat-raised-button>Cancel</button>
+    <button mat-raised-button color="primary" type="submit">Save</button>
+  </div>
+</form>
