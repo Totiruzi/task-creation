@@ -4,23 +4,38 @@
 <form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
   <div mat-dialog-content class="content">
     <div class="row">
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" *ngIf="!data">
         <mat-label>User Name</mat-label>
         <input matInput type="text" placeholder="Chris" formControlName="username"/>
+        <mat-error *ngIf="taskForm.controls['username'].invalid && taskForm.controls['username'].touched">
+          Username is required
+        </mat-error>
       </mat-form-field>
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" *ngIf="!data">
         <mat-label>Email</mat-label>
         <input matInput type="email" placeholder="test@test.com" formControlName="email"/>
+        <mat-error *ngIf="taskForm.controls['email'].invalid && taskForm.controls['email'].touched">
+          Email is required
+        </mat-error>
       </mat-form-field>
       <mat-form-field appearance="outline">
         <mat-label>Text Note</mat-label>
         <textarea matInput formControlName="text"></textarea>
+        <mat-error *ngIf="taskForm.controls['text'].invalid && taskForm.controls['text'].touched">
+          Text is required
+        </mat-error>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <input matInput type="number" placeholder="00" formControlName="status" maxlength="2"/>
+        <mat-error *ngIf="taskForm.controls['status'].invalid && taskForm.controls['status'].touched">
+          Status is required
+        </mat-error>
       </mat-form-field>
     </div>
-    <mat-checkbox formControlName="status">Status</mat-checkbox>
   </div>
   <div mat-dialog-actions class="action">
-    <button mat-raised-button>Cancel</button>
-    <button mat-raised-button color="primary" type="submit">Save</button>
+    <button mat-raised-button type="button" [mat-dialog-close]="false">Cancel</button>
+    <button mat-raised-button color="primary" type="submit">{{data ? "Update" : "Save"}}</button>
   </div>
 </form>
