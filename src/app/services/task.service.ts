@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 export class TaskService {
   api = 'https://uxcandy.com/~shapoval/test-task-backend/v2/?developer=Chris'
   apiDbJson = 'http://localhost:3000/tasks'
-  tasks: [] = [];
+  // tasks: [] = [];
   constructor(private http: HttpClient) { }
 
   getTasks(): Observable<any> {
@@ -19,7 +19,6 @@ export class TaskService {
   addTask(data: any): Observable<any> {
     const taskData = {
       ...data,
-      isEdited: false
     }
     const headers = new HttpHeaders().set('Content-Type', 'multipart/form-data');
     // return this.http.post('https://uxcandy.com/~shapoval/test-task-backend/v2/create?developer=Chris', data, { headers})
@@ -35,7 +34,6 @@ export class TaskService {
   updateTask(id: number, data: any): Observable<any> {
     const taskData = {
       ...data,
-      isEdited: true
     }
     const headers = new HttpHeaders().set('Content-Type', 'multipart/form-data');
     // return this.http.post('https://uxcandy.com/~shapoval/test-task-backend/v2/create?developer=Chris', data, { headers})
