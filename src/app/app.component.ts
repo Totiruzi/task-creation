@@ -55,7 +55,8 @@ export class AppComponent implements OnInit {
   getTaskList() {
     this.taskService.getTasks().subscribe({
       next: (data: any) => {
-        this.tasks = data;
+        this.tasks = data.message.tasks;
+
         this.dataSource = new MatTableDataSource(data);
         this.dataSource.sort = this.sort;
         this.dataSource.paginator = this.paginator;
@@ -113,12 +114,12 @@ export class AppComponent implements OnInit {
   }
 
   onLogin() {
-    this.taskService.logAdminIn(this.loginForm.value).subscribe({
+    const credentials = {
+      username: this.loginForm.get('username')?.value,
+      password: this.loginForm.get('password')?.value
+    }
+    this.taskService.logAdminIn({credentials}).subscribe({
       next: (res) => {
-        console.log(
-          '🚀 ~ file: app.component.ts:117 ~ AppComponent ~ this.taskService.logAdminIn ~ res:',
-          res
-        );
         // Store the current time in local storage
         localStorage.setItem('login-time', Date.now().toString());
         // Store the token in local storage
@@ -126,10 +127,7 @@ export class AppComponent implements OnInit {
         this.showLoginForm = false;
       },
       error: (error) => {
-        console.log(
-          '🚀 ~ file: app.component.ts:120 ~ AppComponent ~ this.taskService.logAdminIn ~ error:',
-          error
-        );
+        console.log
       },
     });
     this.showLoginForm = false;

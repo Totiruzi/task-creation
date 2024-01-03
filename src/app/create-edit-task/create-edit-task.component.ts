@@ -29,7 +29,7 @@ export class CreateEditTaskComponent implements AfterViewInit {
       username: [originalData.username || '', Validators.required],
       email: [originalData.email || '', [Validators.required, Validators.email]],
       text: [originalData.text ||  '', Validators.required],
-      status: [originalData.status || '', [Validators.required, Validators.min(0)]],
+      status: [originalData.status || ''],
       isEdited: [false],
     });
   }
@@ -43,8 +43,8 @@ export class CreateEditTaskComponent implements AfterViewInit {
         username: this.taskForm.get('username')?.value,
         email: this.taskForm.get('email')?.value,
         text: this.taskForm.get('text')?.value,
-        status: this.taskForm.get('status')?.value,
-        isEdited: JSON.stringify(this.taskForm.value) !== JSON.stringify(this.initialValues)
+        // status: this.taskForm.get('status')?.value,
+        // isEdited: JSON.stringify(this.taskForm.value) !== JSON.stringify(this.initialValues)
       };
       if (this.id) {
         this.taskForm.get('isEdited')?.setValue(true);
@@ -57,7 +57,7 @@ export class CreateEditTaskComponent implements AfterViewInit {
           },
         });
       } else {
-        this.taskService.addTask(taskData).subscribe({
+        this.taskService.addTask({taskData}).subscribe({
           next: (data: any) => {
             this.coreService.openSnackBar('Task added successfully', 'Done')
             this.dialogRef.close(true);
