@@ -57,7 +57,7 @@ export class AppComponent implements OnInit {
       next: (data: any) => {
         this.tasks = data.message.tasks;
 
-        this.dataSource = new MatTableDataSource(data);
+        this.dataSource = new MatTableDataSource(this.tasks);
         this.dataSource.sort = this.sort;
         this.dataSource.paginator = this.paginator;
       },
