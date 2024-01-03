@@ -43,8 +43,8 @@ export class CreateEditTaskComponent implements AfterViewInit {
         username: this.taskForm.get('username')?.value,
         email: this.taskForm.get('email')?.value,
         text: this.taskForm.get('text')?.value,
-        // status: this.taskForm.get('status')?.value,
-        // isEdited: JSON.stringify(this.taskForm.value) !== JSON.stringify(this.initialValues)
+        status: this.taskForm.get('status')?.value,
+        isEdited: JSON.stringify(this.taskForm.value) !== JSON.stringify(this.initialValues)
       };
       if (this.id) {
         this.taskForm.get('isEdited')?.setValue(true);
