@@ -10,10 +10,9 @@ import { HttpClientModule } from '@angular/common/http';
 import { CreateEditTaskComponent } from './create-edit-task/create-edit-task.component';
 
 import { MaterialModule } from './material/material.module';
-import { LoginComponent } from './login/login.component';
 
 @NgModule({
-  declarations: [AppComponent, CreateEditTaskComponent, LoginComponent],
+  declarations: [AppComponent, CreateEditTaskComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,

@@ -19,7 +19,7 @@ export class AppComponent implements OnInit {
   tasks: any[] = [];
   loginForm: FormGroup;
   isEdited: boolean = false;
-  isAdmin: boolean = true;
+  isAdmin: boolean = false;
   showLoginForm: boolean = false;
 
   displayedColumns: string[] = [
@@ -56,6 +56,7 @@ export class AppComponent implements OnInit {
     this.taskService.getTasks().subscribe({
       next: (data: any) => {
         this.tasks = data.message.tasks;
+        console.log("🚀 ~ file: app.component.ts:59 ~ AppComponent ~ this.taskService.getTasks ~ data.message.tasks:", data.message.tasks)
 
         this.dataSource = new MatTableDataSource(this.tasks);
         this.dataSource.sort = this.sort;
@@ -122,12 +123,12 @@ export class AppComponent implements OnInit {
       next: (res) => {
         // Store the current time in local storage
         localStorage.setItem('login-time', Date.now().toString());
-        // Store the token in local storage
-        localStorage.setItem('token', res.token);
+        this.isAdmin = true;
+        this.loginForm.reset();
         this.showLoginForm = false;
       },
       error: (error) => {
-        console.log
+        console.log(error)
       },
     });
     this.showLoginForm = false;
@@ -145,6 +146,8 @@ export class AppComponent implements OnInit {
   }
 
   onLogOut() {
-    this.authService.logOut();
+    localStorage.removeItem('token');
+    localStorage.removeItem('login-time');
+    this.isAdmin = false;
   }
 }

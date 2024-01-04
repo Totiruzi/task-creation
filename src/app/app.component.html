@@ -12,9 +12,18 @@
   <button
     mat-raised-button
     aria-label="Admin login button"
+    *ngIf="!isAdmin"
     (click)="toggleLoginForm()"
   >
     login
+  </button>
+  <button
+    mat-raised-button
+    aria-label="Admin login button"
+    *ngIf="isAdmin"
+    (click)="onLogOut()"
+  >
+    logout
   </button>
 </mat-toolbar>
 

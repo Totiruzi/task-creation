@@ -47,8 +47,9 @@ export class CreateEditTaskComponent implements AfterViewInit {
         isEdited: JSON.stringify(this.taskForm.value) !== JSON.stringify(this.initialValues)
       };
       if (this.id) {
+        console.log(this.id);
         this.taskForm.get('isEdited')?.setValue(true);
-        this.taskService.updateTask(this.id, taskData).subscribe({
+        this.taskService.updateTask(this.id, {taskData}).subscribe({
           next: (data: any) => {
             this.coreService.openSnackBar('Task updated')
             this.dialogRef.close(true);

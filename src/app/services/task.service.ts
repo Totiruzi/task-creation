@@ -1,34 +1,57 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TaskService {
-  api = 'https://uxcandy.com/~shapoval/test-task-backend/v2/?developer=Chris'
-  constructor(private http: HttpClient) { }
+  api = 'https://uxcandy.com/~shapoval/test-task-backend/v2/?developer=Chris';
+  token!: string;
+  constructor(private http: HttpClient) {
+    if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+      this.token = localStorage.getItem('token') || '';
+    }
+
+   }
 
   getTasks(): Observable<any> {
     return this.http.get(this.api)
   }
 
   addTask(data: { taskData: any }): Observable<any> {
-    const headers = new HttpHeaders().set('Content-Type', 'multipart/form-data');
-    return this.http.post('https://uxcandy.com/~shapoval/test-task-backend/v2/create?developer=Chris', data, { headers});
+    const formData = new FormData();
+    Object.keys(data.taskData).forEach((key) => {
+      formData.append(key, data.taskData[key]);
+  });
+    return this.http.post('https://uxcandy.com/~shapoval/test-task-backend/v2/create?developer=Chris', formData);
   }
 
   logAdminIn(data: { credentials: any }): Observable<any> {
-    const headers = new HttpHeaders().set('Content-Type', 'multipart/form-data');
-    return this.http.post('https://uxcandy.com/~shapoval/test-task-backend/v2/?developer=Chris', data, { headers});
+    const formData = new FormData();
+    Object.keys(data.credentials).forEach((key) => {
+      formData.append(key, data.credentials[key]);
+  });
+    return this.http.post('https://uxcandy.com/~shapoval/test-task-backend/v2/?developer=Chris', formData).pipe(
+      tap((response: any) => {
+        if (response.token) {
+          localStorage.setItem('token', response.token);
+        }
+      })
+    );
   }
 
-  updateTask(id: number, data: any): Observable<any> {
-    const taskData = {
-      ...data,
-    }
-    const headers = new HttpHeaders().set('Content-Type', 'multipart/form-data');
-    return this.http.post('https://uxcandy.com/~shapoval/test-task-backend/v2/create?developer=Chris', taskData, { headers})
+  updateTask(id: number, data:{taskData: any}): Observable<any> {
+    const formData = new FormData();
+    Object.keys(data.taskData).forEach((key) => {
+      formData.append(key, data.taskData[key]);
+  });
+  if (typeof window !== 'undefined' && typeof window.localStorage !== 'undefined') {
+    const token = localStorage.getItem('token') as string;
+    formData.append('token', token);
+  }
+
+    return this.http.post('https://uxcandy.com/~shapoval/test-task-backend/v2/create/?developer=Chris', formData)
   }
 
 }
