@@ -64,15 +64,18 @@
         <td mat-cell *matCellDef="let row">{{ row.status }}</td>
       </ng-container>
 
-      <!-- Edited Column -->
-      <ng-container matColumnDef="edited">
-        <th mat-header-cell *matHeaderCellDef>Edited</th>
+      <!-- Completed Column -->
+      <ng-container matColumnDef="completed">
+        <th mat-header-cell *matHeaderCellDef> Completed </th>
         <td mat-cell *matCellDef="let row">
-          <ng-container *ngIf="row.isEdited; else noEdit">
-            Edited
-          </ng-container>
-          <ng-template #noEdit> </ng-template>
+          <span [innerHTML]="getCompletedText(row)"></span>
         </td>
+       </ng-container>
+
+       <!-- Edited Column -->
+       <ng-container matColumnDef="edited">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Edited</th>
+        <td mat-cell *matCellDef="let row">{{ row.edited ? 'Yes' : 'No' }}</td>
       </ng-container>
 
       <!-- Action Column -->
@@ -102,7 +105,7 @@
     </table>
 
     <mat-paginator
-      [pageSizeOptions]="[3, 10, 25, 100]"
+      [pageSizeOptions]="[3, 5, 10, 25, 100]"
       aria-label="Select page of users"
     ></mat-paginator>
   </div>
@@ -128,14 +131,11 @@
                 Email is required
               </mat-error>
             </mat-form-field>
-
           </div>
         </div>
-
         <button mat-raised-button color="primary" type="submit">Submit</button>
       </form>
     </div>
-
   </div>
 </div>
 <router-outlet></router-outlet>

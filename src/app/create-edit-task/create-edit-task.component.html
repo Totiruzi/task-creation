@@ -20,14 +20,14 @@
       </mat-form-field>
       <mat-form-field appearance="outline">
         <mat-label>Text Note</mat-label>
-        <textarea matInput formControlName="text"></textarea>
+        <textarea matInput formControlName="text" (ngModelChange)="onTaskChanged()"></textarea>
         <mat-error *ngIf="taskForm.controls['text'].invalid && taskForm.controls['text'].touched">
           Text is required
         </mat-error>
       </mat-form-field>
       <mat-form-field appearance="outline">
         <mat-label>Status</mat-label>
-        <input matInput type="number" placeholder="00" formControlName="status" maxlength="2"/>
+        <input matInput type="number" placeholder="00" formControlName="status" maxlength="2" (ngModelChange)="onTaskChanged()"/>
         <mat-error *ngIf="taskForm.controls['status'].invalid && taskForm.controls['status'].touched">
           Status is required
         </mat-error>

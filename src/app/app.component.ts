@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateEditTaskComponent } from './create-edit-task/create-edit-task.component';
 import { TaskService } from './services/task.service';
@@ -8,7 +8,9 @@ import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { CoreService } from './core/core.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { AuthService } from './core/auth.service';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { BehaviorSubject } from 'rxjs';
+import { ITask } from './models/task.model';
 
 @Component({
   selector: 'app-root',
@@ -16,17 +18,20 @@ import { AuthService } from './core/auth.service';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
-  tasks: any[] = [];
+  initialTaskLists: any[] = []
+  tasks: ITask[] = [];
   loginForm: FormGroup;
   isEdited: boolean = false;
   isAdmin: boolean = false;
   showLoginForm: boolean = false;
+  tasks$ = new BehaviorSubject<any[]>([])
 
   displayedColumns: string[] = [
     'username',
     'email',
     'text',
     'status',
+    'completed',
     'edited',
     'action',
   ];
@@ -40,7 +45,8 @@ export class AppComponent implements OnInit {
     private taskService: TaskService,
     private coreService: CoreService,
     private fb: FormBuilder,
-    private authService: AuthService
+    private sanitizer: DomSanitizer,
+    private cd: ChangeDetectorRef,
   ) {
     this.loginForm = this.fb.group({
       username: ['', Validators.required],
@@ -50,13 +56,19 @@ export class AppComponent implements OnInit {
 
   ngOnInit(): void {
     this.getTaskList();
+    this.tasks$.subscribe(tasks => {
+      this.dataSource = new MatTableDataSource(tasks);
+    });
   }
 
   getTaskList() {
     this.taskService.getTasks().subscribe({
       next: (data: any) => {
         this.tasks = data.message.tasks;
-        console.log("🚀 ~ file: app.component.ts:59 ~ AppComponent ~ this.taskService.getTasks ~ data.message.tasks:", data.message.tasks)
+         // Add a lastUpdated property to each task
+         this.taskService.setTasks(this.tasks);
+        this.initialTaskLists = [...this.tasks]
+        this.tasks$.next(this.tasks);
 
         this.dataSource = new MatTableDataSource(this.tasks);
         this.dataSource.sort = this.sort;
@@ -86,7 +98,7 @@ export class AppComponent implements OnInit {
     });
   }
 
-  openEditTaskForm(data: any) {
+  openEditTaskForm(data: ITask) {
     const dialogRef = this.dialog.open(CreateEditTaskComponent, {
       data: [{ ...data, originalData: data }],
     });
@@ -101,6 +113,14 @@ export class AppComponent implements OnInit {
       },
     });
   }
+
+  getCompletedText(task: any): SafeHtml {
+     if (['10', '11'].includes(String(task.status))) {
+      const result = this.sanitizer.bypassSecurityTrustHtml('<span>Completed</span>');
+      return result;
+    }
+    return '';
+   }
 
   toggleLoginForm() {
     this.showLoginForm = !this.showLoginForm;
@@ -121,14 +141,23 @@ export class AppComponent implements OnInit {
     }
     this.taskService.logAdminIn({credentials}).subscribe({
       next: (res) => {
+        if (res['status'] === 'ok') {
+        // Store the token in local storage
+        const token = res['message']['token'];
+        localStorage.setItem('token', token);
         // Store the current time in local storage
         localStorage.setItem('login-time', Date.now().toString());
         this.isAdmin = true;
         this.loginForm.reset();
         this.showLoginForm = false;
+        this.coreService.openSnackBar('Logged in', 'OK');
+        } else {
+          this.coreService.openSnackBar('Login fail', 'ERROR');
+        }
       },
       error: (error) => {
         console.log(error)
+        this.coreService.openSnackBar('Login fail', 'ERROR');
       },
     });
     this.showLoginForm = false;
