@@ -5,7 +5,7 @@ export interface ITask {
   text: string;
   status: string;
   completed?: boolean;
-  edited?: boolean;
+  edited?: string| boolean | undefined;
   action?: any;
   [key: string]: any;
 }

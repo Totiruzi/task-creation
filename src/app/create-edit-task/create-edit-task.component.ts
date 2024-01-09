@@ -15,6 +15,7 @@ export class CreateEditTaskComponent implements AfterViewInit {
   initialValues: any = {};
   id?: number;
   isEdited: boolean = false;
+  currentPage: number = 1;
 
   constructor(
     private taskFormBuilder: FormBuilder,
@@ -32,13 +33,12 @@ export class CreateEditTaskComponent implements AfterViewInit {
         [Validators.required, Validators.email],
       ],
       text: [originalData.text || '', Validators.required],
-      status: [originalData.status || ''],
-      isEdited: [false],
+      status: [originalData.status || '']
     });
 
-    // Subscribe to valueChanges observable of text and status form controls
-    this.taskForm.valueChanges.subscribe(() => this.onTaskChanged());
+    this.currentPage = this.data.currentPage;
   }
+
   ngAfterViewInit(): void {
     this.taskForm.patchValue(this.data?.originalData);
     this.initialValues = { ...this.taskForm.value };
@@ -47,19 +47,24 @@ export class CreateEditTaskComponent implements AfterViewInit {
   onSubmit() {
     if (this.taskForm.valid) {
       const taskData = {
-        username: this.taskForm.get('username')?.value,
-        email: this.taskForm.get('email')?.value,
-        text: this.taskForm.get('text')?.value,
-        status: this.taskForm.get('status')?.value,
+        ...this.taskForm.value,
         isEdited: this.isEdited,
       };
+      if (
+        this.isEdited &&
+        JSON.stringify(this.taskForm.value) !==
+          JSON.stringify(this.initialValues) &&
+        !taskData.text.includes('\nEdited by Admin')
+      ) {
+        taskData.text += '\nEdited by Admin';
+      }
       if (this.id) {
         console.log(this.id);
         this.taskForm.get('isEdited')?.setValue(true);
-        this.taskService.updateTask(this.id, { taskData }).subscribe({
+        this.taskService.updateTask(this.id, { taskData }, this.currentPage).subscribe({
           next: (data: any) => {
             this.coreService.openSnackBar('Task updated');
-            this.dialogRef.close(true);
+            this.dialogRef.close(taskData);
           },
           error: (err: any) => {},
         });
@@ -75,8 +80,4 @@ export class CreateEditTaskComponent implements AfterViewInit {
     }
   }
 
-  onTaskChanged() {
-    this.isEdited =
-      JSON.stringify(this.taskForm.value) !== JSON.stringify(this.initialValues);
-  }
 }

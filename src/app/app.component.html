@@ -1,28 +1,13 @@
 <mat-toolbar color="primary">
   <span>Task</span>
   <span class="example-spacer"></span>
-  <button
-    mat-raised-button
-    class="create-task"
-    aria-label="Create task button"
-    (click)="openCreateTaskForm()"
-  >
+  <button mat-raised-button class="create-task" aria-label="Create task button" (click)="openCreateTaskForm()">
     Create Task
   </button>
-  <button
-    mat-raised-button
-    aria-label="Admin login button"
-    *ngIf="!isAdmin"
-    (click)="toggleLoginForm()"
-  >
+  <button mat-raised-button aria-label="Admin login button" *ngIf="!isAdmin" (click)="toggleLoginForm()">
     login
   </button>
-  <button
-    mat-raised-button
-    aria-label="Admin login button"
-    *ngIf="isAdmin"
-    (click)="onLogOut()"
-  >
+  <button mat-raised-button aria-label="Admin login button" *ngIf="isAdmin" (click)="onLogOut()">
     logout
   </button>
 </mat-toolbar>
@@ -30,12 +15,7 @@
 <div class="table-container">
   <mat-form-field>
     <mat-label>Filter</mat-label>
-    <input
-      matInput
-      (keyup)="applyFilter($event)"
-      placeholder="Ex. Mia"
-      #input
-    />
+    <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Mia" #input />
   </mat-form-field>
 
   <div class="mat-elevation-z8">
@@ -59,35 +39,39 @@
       </ng-container>
 
       <!-- Status Column -->
-      <ng-container matColumnDef="status">
+      <!-- <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
         <td mat-cell *matCellDef="let row">{{ row.status }}</td>
-      </ng-container>
+      </ng-container> -->
 
-      <!-- Completed Column -->
-      <ng-container matColumnDef="completed">
-        <th mat-header-cell *matHeaderCellDef> Completed </th>
+      <!-- State Column -->
+      <!-- <ng-container matColumnDef="state">
+        <th mat-header-cell *matHeaderCellDef> State </th>
         <td mat-cell *matCellDef="let row">
           <span [innerHTML]="getCompletedText(row)"></span>
         </td>
-       </ng-container>
+      </ng-container> -->
 
-       <!-- Edited Column -->
-       <ng-container matColumnDef="edited">
+      <!-- Edited Column -->
+      <!-- <ng-container matColumnDef="edited">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Edited</th>
-        <td mat-cell *matCellDef="let row">{{ row.edited ? 'Yes' : 'No' }}</td>
+        <td mat-cell *matCellDef="let row">{{ row.edited }}</td>
+      </ng-container> -->
+
+      <!-- Completed Column -->
+      <ng-container matColumnDef="completed">
+        <th mat-header-cell *matHeaderCellDef> Status </th>
+        <td mat-cell *matCellDef="let row">
+          <mat-checkbox [checked]="row.completed" (change)="toggleCompleted(row)" *ngIf="isAdmin"></mat-checkbox>
+          <span *ngIf="row.completed">completed</span>
+        </td>
       </ng-container>
 
       <!-- Action Column -->
       <ng-container matColumnDef="action">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Action</th>
         <td mat-cell *matCellDef="let row">
-          <button
-            mat-icon-button
-            color="primary"
-            (click)="openEditTaskForm(row)"
-            *ngIf="isAdmin"
-          >
+          <button mat-icon-button color="primary" (click)="openEditTaskForm(row)" *ngIf="isAdmin">
             <mat-icon>edit</mat-icon>
           </button>
         </td>
@@ -104,10 +88,7 @@
       </tr>
     </table>
 
-    <mat-paginator
-      [pageSizeOptions]="[2, 5, 10, 25, 100]"
-      aria-label="Select page of users"
-    ></mat-paginator>
+    <mat-paginator [length]="totalTasks" [pageSize]="3" [pageSizeOptions]="[3]" (page)="paginator.page.emit($event)" aria-label="Select page of users"></mat-paginator>
   </div>
 </div>
 
@@ -119,14 +100,14 @@
           <div class="row">
             <mat-form-field appearance="outline">
               <mat-label>User Name</mat-label>
-              <input matInput type="text" placeholder="Chris" formControlName="username"/>
+              <input matInput type="text" placeholder="Chris" formControlName="username" #usernameInput/>
               <mat-error *ngIf="loginForm.controls['username'].invalid && loginForm.controls['username'].touched">
                 Username is required
               </mat-error>
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Password</mat-label>
-              <input matInput type="password" formControlName="password"/>
+              <input matInput type="password" formControlName="password" />
               <mat-error *ngIf="loginForm.controls['password'].invalid && loginForm.controls['password'].touched">
                 Email is required
               </mat-error>

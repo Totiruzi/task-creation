@@ -1,4 +1,10 @@
-import { ChangeDetectorRef, Component, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { CreateEditTaskComponent } from './create-edit-task/create-edit-task.component';
 import { TaskService } from './services/task.service';
@@ -17,36 +23,38 @@ import { ITask } from './models/task.model';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent implements OnInit {
-  initialTaskLists: any[] = []
+export class AppComponent implements OnInit, AfterViewInit {
+  initialTaskLists: any[] = [];
   tasks: ITask[] = [];
   loginForm: FormGroup;
   isEdited: boolean = false;
   isAdmin: boolean = false;
   showLoginForm: boolean = false;
-  tasks$ = new BehaviorSubject<any[]>([])
+  tasks$: BehaviorSubject<ITask[]> = new BehaviorSubject<any[]>([]);
+  totalTasks: number = 0;
 
   displayedColumns: string[] = [
     'username',
     'email',
     'text',
-    'status',
+    // 'status',
+    // 'state',
     'completed',
-    'edited',
+    // 'edited',
     'action',
   ];
   dataSource!: MatTableDataSource<any>;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild('usernameInput') usernameInput!: ElementRef;
 
   constructor(
     private dialog: MatDialog,
     private taskService: TaskService,
     private coreService: CoreService,
     private fb: FormBuilder,
-    private sanitizer: DomSanitizer,
-    private cd: ChangeDetectorRef,
+    private sanitizer: DomSanitizer
   ) {
     this.loginForm = this.fb.group({
       username: ['', Validators.required],
@@ -55,25 +63,57 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.isAdmin = this.isAuthenticated();
     this.getTaskList();
-    this.tasks$.subscribe(tasks => {
-      this.dataSource = new MatTableDataSource(tasks);
-    });
   }
 
-  getTaskList() {
-    this.taskService.getTasks().subscribe({
+  ngAfterViewInit(): void {
+    // this.dataSource.paginator = this.paginator;
+
+    this.paginator.page.subscribe((pageEvent) => {
+      if (this.paginator) {
+        this.dataSource.paginator = this.paginator;
+       }
+      // Call getTaskList with the new page index
+      this.getTaskList(pageEvent.pageIndex + 1);
+    });
+
+    this.usernameInput.nativeElement.focus();
+  }
+
+  getTaskList(page: number = 1) {
+    this.taskService.getTasks(page).subscribe({
       next: (data: any) => {
         this.tasks = data.message.tasks;
-         // Add a lastUpdated property to each task
-         this.taskService.setTasks(this.tasks);
-        this.initialTaskLists = [...this.tasks]
+        this.totalTasks = parseInt(data.message.total_task_count, 10);
+
+        // Retrieve the state of all checkboxes from the local storage
+        const checkboxes = JSON.parse(
+          localStorage.getItem('checkboxes') || '[]'
+        );
+        this.tasks = this.tasks.map((task) => {
+          const checkbox = checkboxes.find(
+            (cb: CheckboxState) => cb.id === task.id
+          );
+          return checkbox ? { ...task, completed: checkbox.completed } : task;
+        });
+
+        // Add a lastUpdated property to each task
+        this.taskService.setTasks(this.tasks);
+        this.initialTaskLists = [...this.tasks];
         this.tasks$.next(this.tasks);
 
         this.dataSource = new MatTableDataSource(this.tasks);
         this.dataSource.sort = this.sort;
         this.dataSource.paginator = this.paginator;
-      },
+
+        // Update the MatPaginator
+        this.paginator.length = this.totalTasks;
+        this.paginator.pageIndex = page - 1;
+        // setTimeout(() => {
+        //   this.paginator.pageIndex = page - 1;
+        // }, 0);
+       },
       error: (error: any) => {},
     });
   }
@@ -88,7 +128,9 @@ export class AppComponent implements OnInit {
   }
 
   openCreateTaskForm() {
-    const dialogRef = this.dialog.open(CreateEditTaskComponent);
+    const dialogRef = this.dialog.open(CreateEditTaskComponent, {
+      data: { currentPage: this.paginator.pageIndex + 1 },
+    });
     dialogRef.afterClosed().subscribe({
       next: (val) => {
         if (val) {
@@ -105,8 +147,8 @@ export class AppComponent implements OnInit {
     dialogRef.componentInstance.id = data.id;
 
     dialogRef.afterClosed().subscribe({
-      next: (val) => {
-        if (val) {
+      next: (editedTask: ITask) => {
+        if (editedTask) {
           this.coreService.openSnackBar('Task Updated', 'done');
           this.getTaskList();
         }
@@ -115,12 +157,25 @@ export class AppComponent implements OnInit {
   }
 
   getCompletedText(task: any): SafeHtml {
-     if (['10', '11'].includes(String(task.status))) {
-      const result = this.sanitizer.bypassSecurityTrustHtml('<span>Completed</span>');
+    if (['10', '11'].includes(String(task.status))) {
+      const result = this.sanitizer.bypassSecurityTrustHtml(
+        '<span>Completed</span>'
+      );
       return result;
     }
-    return '';
-   }
+    return 'Inprogress';
+  }
+
+  toggleCompleted(row: any) {
+    row.completed = !row.completed;
+    // Save the state of all checkboxes to the local storage
+    localStorage.setItem(
+      'checkboxes',
+      JSON.stringify(
+        this.tasks.map((task) => ({ id: task.id, completed: task.completed }))
+      )
+    );
+  }
 
   toggleLoginForm() {
     this.showLoginForm = !this.showLoginForm;
@@ -137,26 +192,26 @@ export class AppComponent implements OnInit {
   onLogin() {
     const credentials = {
       username: this.loginForm.get('username')?.value,
-      password: this.loginForm.get('password')?.value
-    }
-    this.taskService.logAdminIn({credentials}).subscribe({
+      password: this.loginForm.get('password')?.value,
+    };
+    this.taskService.logAdminIn({ credentials }).subscribe({
       next: (res) => {
         if (res['status'] === 'ok') {
-        // Store the token in local storage
-        const token = res['message']['token'];
-        localStorage.setItem('token', token);
-        // Store the current time in local storage
-        localStorage.setItem('login-time', Date.now().toString());
-        this.isAdmin = true;
-        this.loginForm.reset();
-        this.showLoginForm = false;
-        this.coreService.openSnackBar('Logged in', 'OK');
+          // Store the token in local storage
+          const token = res['message']['token'];
+          localStorage.setItem('token', token);
+          // Store the current time in local storage
+          localStorage.setItem('login-time', Date.now().toString());
+          this.isAdmin = true;
+          this.loginForm.reset();
+          this.showLoginForm = false;
+          this.coreService.openSnackBar('Logged in', 'OK');
         } else {
           this.coreService.openSnackBar('Login fail', 'ERROR');
         }
       },
       error: (error) => {
-        console.log(error)
+        console.log(error);
         this.coreService.openSnackBar('Login fail', 'ERROR');
       },
     });
@@ -179,4 +234,9 @@ export class AppComponent implements OnInit {
     localStorage.removeItem('login-time');
     this.isAdmin = false;
   }
+}
+
+interface CheckboxState {
+  id: number;
+  completed: boolean;
 }

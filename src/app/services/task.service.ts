@@ -21,8 +21,8 @@ export class TaskService {
 
    }
 
-  getTasks(): Observable<ITask> {
-    return this.http.get<ITask>(this.api)
+  getTasks(page: number): Observable<ITask> {
+    return this.http.get<ITask>(`${this.api}&page=${page}`)
   }
 
   addTask(data: { taskData: ITask }): Observable<ITask> {
@@ -47,7 +47,7 @@ export class TaskService {
     );
   }
 
-  updateTask(id: number, data:{taskData: ITask}): Observable<ITask> {
+  updateTask(id: number, data:{taskData: ITask}, page: number): Observable<ITask> {
     const formData = new FormData();
     Object.keys(data.taskData).forEach((key) => {
     formData.append(key, data.taskData[key]);

@@ -4,14 +4,14 @@
 <form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
   <div mat-dialog-content class="content">
     <div class="row">
-      <mat-form-field appearance="outline" *ngIf="!data">
+      <mat-form-field appearance="outline">
         <mat-label>User Name</mat-label>
         <input matInput type="text" placeholder="Chris" formControlName="username"/>
         <mat-error *ngIf="taskForm.controls['username'].invalid && taskForm.controls['username'].touched">
           Username is required
         </mat-error>
       </mat-form-field>
-      <mat-form-field appearance="outline" *ngIf="!data">
+      <mat-form-field appearance="outline">
         <mat-label>Email</mat-label>
         <input matInput type="email" placeholder="test@test.com" formControlName="email"/>
         <mat-error *ngIf="taskForm.controls['email'].invalid && taskForm.controls['email'].touched">
@@ -20,14 +20,14 @@
       </mat-form-field>
       <mat-form-field appearance="outline">
         <mat-label>Text Note</mat-label>
-        <textarea matInput formControlName="text" (ngModelChange)="onTaskChanged()"></textarea>
+        <textarea matInput formControlName="text" ></textarea>
         <mat-error *ngIf="taskForm.controls['text'].invalid && taskForm.controls['text'].touched">
           Text is required
         </mat-error>
       </mat-form-field>
       <mat-form-field appearance="outline">
         <mat-label>Status</mat-label>
-        <input matInput type="number" placeholder="00" formControlName="status" maxlength="2" (ngModelChange)="onTaskChanged()"/>
+        <input matInput type="number" placeholder="00" formControlName="status" maxlength="2"/>
         <mat-error *ngIf="taskForm.controls['status'].invalid && taskForm.controls['status'].touched">
           Status is required
         </mat-error>
