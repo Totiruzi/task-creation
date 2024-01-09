@@ -71,12 +71,12 @@ export class AppComponent implements OnInit, AfterViewInit {
     // this.dataSource.paginator = this.paginator;
 
     this.paginator.page.subscribe((pageEvent) => {
-      if (this.paginator) {
-        this.dataSource.paginator = this.paginator;
-       }
-      // Call getTaskList with the new page index
-      this.getTaskList(pageEvent.pageIndex + 1);
-    });
+      // if (this.paginator) {
+        //  }
+        // Call getTaskList with the new page index
+        this.getTaskList(pageEvent.pageIndex + 1);
+      });
+    this.dataSource.paginator = this.paginator;
 
     this.usernameInput.nativeElement.focus();
   }
