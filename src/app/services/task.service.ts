@@ -7,7 +7,7 @@ import { IAdmin, ITask } from '../models/task.model';
   providedIn: 'root'
 })
 export class TaskService {
-  api = 'https://uxcandy.com/~shapoval/test-task-backend/v2/?developer=Chris';
+  api = 'https://uxcandy.com/~shapoval/test-task-backend/v2/?developer=chris';
   token!: string;
   tasks: any[] = [];
 
@@ -30,7 +30,7 @@ export class TaskService {
     Object.keys(data.taskData).forEach((key) => {
       formData.append(key, data.taskData[key]);
   });
-    return this.http.post<ITask>('https://uxcandy.com/~shapoval/test-task-backend/v2/create?developer=Chris', formData);
+    return this.http.post<ITask>('https://uxcandy.com/~shapoval/test-task-backend/v2/create?developer=chris', formData);
   }
 
   logAdminIn(data: { credentials: IAdmin }): Observable<IAdmin> {
@@ -38,7 +38,7 @@ export class TaskService {
     Object.keys(data.credentials).forEach((key) => {
       formData.append(key, data.credentials[key]);
   });
-    return this.http.post('https://uxcandy.com/~shapoval/test-task-backend/v2/login/?developer=Chris', formData).pipe(
+    return this.http.post('https://uxcandy.com/~shapoval/test-task-backend/v2/login/?developer=chris', formData).pipe(
       tap((response: any) => {
         if (response.message.token) {
           localStorage.setItem('token', response.token);
@@ -58,7 +58,7 @@ export class TaskService {
      return EMPTY; // Returns an Observable that immediately completes without emitting any values
     }
     formData.append('token', token); // Append the token as a POST parameter
-    return this.http.post(`https://uxcandy.com/~shapoval/test-task-backend/v2/edit/${id}?developer=Chris`, formData).pipe(
+    return this.http.post(`https://uxcandy.com/~shapoval/test-task-backend/v2/edit/${id}?developer=chris`, formData).pipe(
       map((updatedTask: any) => {
         // Update the lastUpdated property of the task
         const taskIndex = this.tasks.findIndex((task) => task.id === id);
@@ -66,7 +66,6 @@ export class TaskService {
           this.tasks[taskIndex].lastUpdated = Date.now();
           // Replace the old task with the updated task
           this.tasks[taskIndex] = updatedTask;
-          console.log("🚀 ~ file: task.service.ts:68 ~ TaskService ~ map ~ updated Task:", updatedTask)
         }
         return updatedTask;
       })

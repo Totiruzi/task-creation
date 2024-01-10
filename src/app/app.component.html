@@ -88,7 +88,7 @@
       </tr>
     </table>
 
-    <mat-paginator [length]="totalTasks" [pageSize]="3" [pageSizeOptions]="[3]" (page)="paginator.page.emit($event)" aria-label="Select page of users"></mat-paginator>
+    <mat-paginator [length]="totalTasks" [pageIndex]="currentPage" [pageSize]="pageSize" [pageSizeOptions]="pageSizeOptions" (page)="pageChanged($event)"  aria-label="Select page of users"></mat-paginator>
   </div>
 </div>
 

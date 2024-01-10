@@ -15,3 +15,8 @@ export interface IAdmin {
   password: string;
   [key: string]: any;
 }
+
+export interface CheckboxState {
+  id: number;
+  completed: boolean;
+}

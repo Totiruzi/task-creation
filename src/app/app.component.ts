@@ -9,14 +9,14 @@ import { MatDialog } from '@angular/material/dialog';
 import { CreateEditTaskComponent } from './create-edit-task/create-edit-task.component';
 import { TaskService } from './services/task.service';
 
-import { MatPaginator } from '@angular/material/paginator';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { CoreService } from './core/core.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { BehaviorSubject } from 'rxjs';
-import { ITask } from './models/task.model';
+import { ITask, CheckboxState } from './models/task.model';
 
 @Component({
   selector: 'app-root',
@@ -32,6 +32,10 @@ export class AppComponent implements OnInit, AfterViewInit {
   showLoginForm: boolean = false;
   tasks$: BehaviorSubject<ITask[]> = new BehaviorSubject<any[]>([]);
   totalTasks: number = 0;
+  pageSize = 3; // Load 10 rows per page
+  currentPage = 0;
+  pageSizeOptions: number[] = [3];
+  dataSource!: MatTableDataSource<any>;
 
   displayedColumns: string[] = [
     'username',
@@ -43,7 +47,6 @@ export class AppComponent implements OnInit, AfterViewInit {
     // 'edited',
     'action',
   ];
-  dataSource!: MatTableDataSource<any>;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -70,19 +73,19 @@ export class AppComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     // this.dataSource.paginator = this.paginator;
 
-    this.paginator.page.subscribe((pageEvent) => {
-      // if (this.paginator) {
-        //  }
-        // Call getTaskList with the new page index
-        this.getTaskList(pageEvent.pageIndex + 1);
-      });
+    // this.paginator.page.subscribe((pageEvent) => {
+    //   // if (this.paginator) {
+    //     //  }
+    //     // Call getTaskList with the new page index
+    //     this.getTaskList(pageEvent.pageIndex + 1);
+    //   });
     this.dataSource.paginator = this.paginator;
 
-    this.usernameInput.nativeElement.focus();
+    this.usernameInput?.nativeElement?.focus();
   }
 
-  getTaskList(page: number = 1) {
-    this.taskService.getTasks(page).subscribe({
+  getTaskList() {
+    this.taskService.getTasks(this.currentPage + 1).subscribe({
       next: (data: any) => {
         this.tasks = data.message.tasks;
         this.totalTasks = parseInt(data.message.total_task_count, 10);
@@ -108,12 +111,13 @@ export class AppComponent implements OnInit, AfterViewInit {
         this.dataSource.paginator = this.paginator;
 
         // Update the MatPaginator
-        this.paginator.length = this.totalTasks;
-        this.paginator.pageIndex = page - 1;
-        // setTimeout(() => {
-        //   this.paginator.pageIndex = page - 1;
-        // }, 0);
-       },
+        // this.paginator.length = this.totalTasks;
+        // this.paginator.pageIndex = page - 1;
+        setTimeout(() => {
+          this.paginator.pageIndex = this.currentPage;
+          this.paginator.length = this.totalTasks;
+        }, 0);
+      },
       error: (error: any) => {},
     });
   }
@@ -128,9 +132,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   openCreateTaskForm() {
-    const dialogRef = this.dialog.open(CreateEditTaskComponent, {
-      data: { currentPage: this.paginator.pageIndex + 1 },
-    });
+    const dialogRef = this.dialog.open(CreateEditTaskComponent);
     dialogRef.afterClosed().subscribe({
       next: (val) => {
         if (val) {
@@ -211,7 +213,6 @@ export class AppComponent implements OnInit, AfterViewInit {
         }
       },
       error: (error) => {
-        console.log(error);
         this.coreService.openSnackBar('Login fail', 'ERROR');
       },
     });
@@ -234,9 +235,10 @@ export class AppComponent implements OnInit, AfterViewInit {
     localStorage.removeItem('login-time');
     this.isAdmin = false;
   }
-}
 
-interface CheckboxState {
-  id: number;
-  completed: boolean;
+  pageChanged(event: PageEvent) {
+    this.pageSize = event.pageSize;
+    this.currentPage = event.pageIndex;
+    this.getTaskList();
+  }
 }

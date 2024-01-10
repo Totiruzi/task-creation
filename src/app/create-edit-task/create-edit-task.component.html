@@ -4,16 +4,16 @@
 <form [formGroup]="taskForm" (ngSubmit)="onSubmit()">
   <div mat-dialog-content class="content">
     <div class="row">
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" *ngIf="isEdited" >
         <mat-label>User Name</mat-label>
         <input matInput type="text" placeholder="Chris" formControlName="username"/>
         <mat-error *ngIf="taskForm.controls['username'].invalid && taskForm.controls['username'].touched">
           Username is required
         </mat-error>
       </mat-form-field>
-      <mat-form-field appearance="outline">
+      <mat-form-field appearance="outline" *ngIf="isEdited" >
         <mat-label>Email</mat-label>
-        <input matInput type="email" placeholder="test@test.com" formControlName="email"/>
+        <input matInput type="email" placeholder="test@test.com" formControlName="email" />
         <mat-error *ngIf="taskForm.controls['email'].invalid && taskForm.controls['email'].touched">
           Email is required
         </mat-error>

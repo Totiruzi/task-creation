@@ -17,6 +17,7 @@ export class CreateEditTaskComponent implements AfterViewInit {
   isEdited: boolean = false;
   currentPage: number = 1;
 
+  hasTextBeenEdited: boolean = false;
   constructor(
     private taskFormBuilder: FormBuilder,
     private taskService: TaskService,
@@ -35,13 +36,15 @@ export class CreateEditTaskComponent implements AfterViewInit {
       text: [originalData.text || '', Validators.required],
       status: [originalData.status || '']
     });
-
-    this.currentPage = this.data.currentPage;
   }
 
   ngAfterViewInit(): void {
     this.taskForm.patchValue(this.data?.originalData);
     this.initialValues = { ...this.taskForm.value };
+
+    this.taskForm.get('text')?.valueChanges.subscribe(newValue => {
+      this.hasTextBeenEdited = newValue !== this.initialValues.text;
+    });
   }
 
   onSubmit() {
@@ -51,15 +54,17 @@ export class CreateEditTaskComponent implements AfterViewInit {
         isEdited: this.isEdited,
       };
       if (
-        this.isEdited &&
+        this.hasTextBeenEdited &&
         JSON.stringify(this.taskForm.value) !==
-          JSON.stringify(this.initialValues) &&
-        !taskData.text.includes('\nEdited by Admin')
+          JSON.stringify(this.initialValues)
       ) {
-        taskData.text += '\nEdited by Admin';
+        if (!taskData.text.includes('\nEdited by Admin')) {
+          taskData.text += '\nEdited by Admin';
+        }
       }
+   
+    
       if (this.id) {
-        console.log(this.id);
         this.taskForm.get('isEdited')?.setValue(true);
         this.taskService.updateTask(this.id, { taskData }, this.currentPage).subscribe({
           next: (data: any) => {
